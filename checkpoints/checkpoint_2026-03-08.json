@@ -1,0 +1,79 @@
+{
+  "checkpoint_date": "2026-03-08T21:45:00Z",
+  "project": "biddeed-ai",
+  "repo": "breverdbidder/biddeed-ai",
+  "domain": {
+    "name": "biddeed.ai",
+    "registrar": "Cloudflare",
+    "registrant": "ARIEL SHAPIRA",
+    "email": "BREVARDBIDDERAI@GMAIL.COM",
+    "ns": [
+      "PABLO.NS.CLOUDFLARE.COM",
+      "VITA.NS.CLOUDFLARE.COM"
+    ],
+    "whois_updated": "2026-03-08T21:43:42Z"
+  },
+  "stack": {
+    "framework": "Next.js 15 App Router (vercel/chatbot fork v3.1.0)",
+    "auth_current": "NextAuth (TO SWAP \u2192 Clerk)",
+    "db_current": "Vercel Postgres (TO SWAP \u2192 Supabase)",
+    "ai": "Vercel AI SDK + ai-sdk/gateway",
+    "deploy": "Vercel",
+    "maps": "Mapbox (account: everest18)",
+    "ui": "shadcn/ui + Tailwind + Radix"
+  },
+  "metrics": {
+    "files": 235,
+    "directories": 54,
+    "team_commits": 6,
+    "upstream_commits": 9,
+    "tasks_total": 57,
+    "tasks_completed": 0,
+    "percent_complete": 0
+  },
+  "phase": "Phase 1: Foundation (Week 1)",
+  "current_issue": "ISSUE-001: Fork Setup + Auth + DB Swap",
+  "status": "INITIALIZED \u2014 config and docs pushed, zero code changes executed",
+  "schedules": {
+    "enabled": [
+      {
+        "id": "nightly-auction-scrape-verify",
+        "cron": "30 23 * * *"
+      },
+      {
+        "id": "morning-auction-brief",
+        "cron": "30 8 * * 1-5"
+      },
+      {
+        "id": "weekly-supabase-health",
+        "cron": "0 10 * * 1"
+      },
+      {
+        "id": "friday-shabbat-guard",
+        "cron": "0 15 * * 5"
+      }
+    ],
+    "disabled": [
+      {
+        "id": "overnight-dev-session",
+        "cron": "0 1 * * 1-5"
+      },
+      {
+        "id": "zonewise-auction-sync-verify",
+        "cron": "0 7 * * *"
+      }
+    ]
+  },
+  "shared_resources": {
+    "supabase": "mocerqjnksmhcjzxrewo.supabase.co",
+    "clerk": "Same org as ZoneWise (SSO)",
+    "mapbox": "everest18",
+    "github_org": "breverdbidder"
+  },
+  "email_routing_todo": [
+    "ariel@biddeed.ai \u2192 Everestcapital8@gmail.com",
+    "notifications@biddeed.ai \u2192 Everestcapital8@gmail.com",
+    "deals@biddeed.ai \u2192 Everestcapital8@gmail.com"
+  ],
+  "next_action": "Run launch-biddeed-build.sh for ISSUE-001 Claude Code session"
+}
