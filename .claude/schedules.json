@@ -1,0 +1,126 @@
+{
+  "tasks": [
+    {
+      "id": "nightly-auction-scrape-verify",
+      "name": "Nightly Auction Scrape Verification",
+      "enabled": true,
+      "trigger": {
+        "type": "cron",
+        "expression": "30 23 * * *",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "Check the Supabase multi_county_auctions table for today's scrape results. Verify: 1) All 46 FL counties have new rows, 2) No county has zero records for today, 3) Fix any 'miami-dade' (hyphen) rows to 'miami_dade' (underscore), 4) Report total new rows inserted today, 5) Flag any counties with judgment_amount NULL rate above 5%. Write results to ~/.claude/logs/scrape-verify.log and if any county failed, create a GitHub issue in breverdbidder/biddeed-ai with label 'scrape-failure'.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 300,
+        "skipPermissions": true,
+        "worktree": {
+          "enabled": false
+        }
+      },
+      "tags": ["biddeed", "scraping", "nightly", "data-quality"]
+    },
+    {
+      "id": "morning-auction-brief",
+      "name": "Morning Auction Intelligence Brief",
+      "enabled": true,
+      "trigger": {
+        "type": "cron",
+        "expression": "30 8 * * 1-5",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "Generate a morning auction intelligence brief for Ariel. Query multi_county_auctions for: 1) All active/upcoming auctions in Brevard County, 2) Any new auctions posted in last 24 hours across all 46 counties, 3) Run max bid formula (ARV*70% - Repairs - $10K - MIN($25K,15%*ARV)) on Brevard properties with judgment under $300K, 4) Categorize as BID (ratio>=75%), REVIEW (60-74%), SKIP (<60%), 5) Count totals by county for active auctions. Save report as markdown to ~/daily-briefs/YYYY-MM-DD-auction-brief.md. Keep it concise - Ariel has 20 minutes max.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 180,
+        "skipPermissions": false,
+        "worktree": {
+          "enabled": false
+        }
+      },
+      "tags": ["biddeed", "daily", "morning-brief", "auctions"]
+    },
+    {
+      "id": "weekly-supabase-health",
+      "name": "Weekly Supabase Health Check",
+      "enabled": true,
+      "trigger": {
+        "type": "cron",
+        "expression": "0 10 * * 1",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "Run a health check on Supabase instance mocerqjnksmhcjzxrewo.supabase.co. Check: 1) Total rows in multi_county_auctions (should be growing ~200-500/week), 2) Table sizes for all bd_* and zw_* tables, 3) RLS policies are active on all user-facing tables, 4) Edge Functions are responding (hit /api/v1/auctions?county=brevard&limit=1), 5) Any failed Edge Function invocations in last 7 days, 6) Supabase storage usage vs free tier limits. Report findings and flag anything approaching limits.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 120,
+        "skipPermissions": false,
+        "worktree": {
+          "enabled": false
+        }
+      },
+      "tags": ["infra", "weekly", "supabase", "health-check"]
+    },
+    {
+      "id": "overnight-dev-session",
+      "name": "Overnight Autonomous Dev Session",
+      "enabled": false,
+      "trigger": {
+        "type": "cron",
+        "expression": "0 1 * * 1-5",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "Load TODO.md from the repo. Find the first unchecked task. Execute it fully: write code, run tests, verify. Mark it [x] in TODO.md. Commit with descriptive message. Push to feature branch. If blocked after 3 attempts, log the blocker and move to next task. Continue until 3 tasks completed or 2 hours elapsed. Push all changes.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 7200,
+        "skipPermissions": true,
+        "worktree": {
+          "enabled": true,
+          "branchPrefix": "claude-dev/",
+          "remoteName": "origin"
+        }
+      },
+      "tags": ["biddeed", "dev", "autonomous", "overnight"]
+    },
+    {
+      "id": "friday-shabbat-guard",
+      "name": "Friday Shabbat Shutdown Guard",
+      "enabled": true,
+      "trigger": {
+        "type": "cron",
+        "expression": "0 15 * * 5",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "It is Friday afternoon. Check for any running Claude Code sessions or pending deployments. 1) List all active scheduled tasks, 2) Verify no deployments are mid-flight, 3) Push any uncommitted work to feature branches, 4) Generate a weekend status summary: what was completed this week, what is pending for Sunday night. Save to ~/weekly-status/YYYY-MM-DD-pre-shabbat.md. Disable overnight-dev-session task for tonight and Saturday.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 120,
+        "skipPermissions": true,
+        "worktree": {
+          "enabled": false
+        }
+      },
+      "tags": ["personal", "shabbat", "weekly", "shutdown"]
+    },
+    {
+      "id": "zonewise-auction-sync-verify",
+      "name": "ZoneWise Auction Overlay Sync Verification",
+      "enabled": false,
+      "trigger": {
+        "type": "cron",
+        "expression": "0 7 * * *",
+        "timezone": "America/New_York"
+      },
+      "execution": {
+        "command": "Verify the BidDeed→ZoneWise data bridge is working. 1) Call Edge Function /api/v1/auctions/geojson?county=brevard and confirm valid GeoJSON response, 2) Check that auction count matches multi_county_auctions active count for Brevard, 3) Verify Clerk JWT auth is working on all 4 Edge Function endpoints, 4) Check ZoneWise.ai/api/health is responding. Log results. If any endpoint fails, create GitHub issue in breverdbidder/zonewise-web.",
+        "workingDirectory": "~/repos/biddeed-ai",
+        "timeout": 120,
+        "skipPermissions": false,
+        "worktree": {
+          "enabled": false
+        }
+      },
+      "tags": ["zonewise", "biddeed", "api-bridge", "daily"]
+    }
+  ]
+}
