@@ -2,143 +2,97 @@
 
 ## Nir Eyal Hooked Model Integration
 
-This module implements passive behavioral intelligence across the BidDeed.AI platform, enabling the four-phase Hooked Model: **Trigger → Action → Variable Reward → Investment**.
+Passive behavioral tracking + automated teaser delivery for distressed asset investors.
 
-### Architecture Overview
+### Current Status (March 9, 2026)
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Supabase tables (4) | ✅ LIVE | user_events, user_buy_boxes, user_teasers, user_preferences |
+| Indexes (22) | ✅ LIVE | Optimized for buy box computation queries |
+| Triggers (3) | ✅ LIVE | Auto-update updated_at |
+| Analytics views (2) | ✅ LIVE | v_teaser_funnel, v_buy_box_health |
+| RLS + policies | ✅ LIVE | service_role access only (user policies added when auth ready) |
+| Vault secret | ✅ LIVE | service_role_key stored for future pg_cron auth |
+| Edge Functions (4) | ⏸️ CODE READY | Not deployed — deploy when 50+ users active |
+| pg_cron jobs (3) | ⏸️ COMMENTED OUT | Re-enable after Edge Functions deployed |
+| PostHog tracking | ⏸️ CODE READY | Deploy JS snippet when frontend goes live |
+| Novu notifications | ⏸️ NOT STARTED | Sign up + configure when teaser engine needed |
+
+### Activation Checklist
+
+Deploy these **in order** when user count justifies each phase:
 
 ```
-User browses BidDeed.AI
-       │
-       ▼
-PostHog JS (tracks every click, search, dwell)
-       │
-       ▼ (webhook sync)
-Supabase: user_events table
-       │
-       ▼ (pg_cron 2 AM EST)
-Edge Function: compute-buy-boxes
-       │ Analyzes behavior → builds implicit buy box
-       ▼
-Supabase: user_buy_boxes table
-       │
-       ▼ (pg_cron 6 AM EST)
-Edge Function: match-auctions
-       │ Scores buy_boxes × new auctions → teasers
-       ▼
-Supabase: user_teasers table
-       │
-       ▼ (pg_cron 6:05 AM EST)
-Edge Function: send-teasers
-       │ Routes to Novu → channels by tier
-       ▼
-┌──────────────┬────────────┬──────────┐
-│ Resend       │ FCM        │ Twilio   │
-│ (Email)      │ (Push)     │ (SMS)    │
-│ Tier 1+2     │ Tier 2+3   │ Tier 3   │
-└──────────────┴────────────┴──────────┘
-       │
-       ▼
-User opens teaser → visits BidDeed → PostHog tracks → refines buy box → LOOP
+Phase 1: PostHog (deploy at launch, even with 1 user)
+  □ Sign up at https://us.posthog.com/signup (free, 1M events/mo)
+  □ Get project API key
+  □ Set NEXT_PUBLIC_POSTHOG_KEY in Cloudflare Pages env vars
+  □ PostHogProvider.tsx already in biddeed-ai-ui — just needs the key
+
+Phase 2: Edge Functions + Cron (deploy at 50+ active users)
+  □ supabase functions deploy compute-buy-boxes
+  □ supabase functions deploy match-auctions
+  □ supabase functions deploy posthog-webhook
+  □ Set POSTHOG_WEBHOOK_SECRET as Edge Function secret
+  □ Configure PostHog webhook → Edge Function URL
+  □ Uncomment pg_cron jobs in migration file, run in SQL Editor
+
+Phase 3: Novu + Channels (deploy at 100+ active users)
+  □ Sign up at https://web.novu.co/auth/signup (free)
+  □ Create templates: biddeed-teaser-tier1-digest, tier2-strong, tier3-urgent
+  □ Connect Resend as email provider
+  □ Connect Firebase Cloud Messaging for push
+  □ supabase functions deploy send-teasers
+  □ Set NOVU_API_KEY as Edge Function secret
+
+Phase 4: SMS (deploy at 200+ active users with proven engagement)
+  □ Sign up for Twilio
+  □ Connect Twilio as SMS provider in Novu
+  □ Enable Tier 3 SMS delivery
 ```
 
 ### File Structure
 
 ```
 behavioral-intelligence/
-├── README.md                              # This file
+├── README.md                                    # This file
 ├── migrations/
-│   └── 20260308_behavioral_intelligence.sql  # Tables + cron + views
+│   └── 20260308_behavioral_intelligence.sql     # Tables + indexes + views
+│                                                 # pg_cron jobs COMMENTED OUT
 ├── supabase/functions/
-│   ├── compute-buy-boxes/index.ts         # Buy box computation (2 AM)
-│   ├── match-auctions/index.ts            # Auction matching (6 AM)
-│   └── send-teasers/index.ts              # Novu delivery (6:05 AM)
+│   ├── compute-buy-boxes/index.ts               # Buy box engine (2 AM)
+│   ├── match-auctions/index.ts                  # Auction matcher (6 AM)
+│   ├── send-teasers/index.ts                    # Novu delivery (6:05 AM)
+│   └── posthog-webhook/index.ts                 # PostHog → user_events sync
 ├── lib/
-│   └── posthog/config.ts                  # PostHog tracking functions
+│   └── posthog/config.ts                        # 20 tracking functions
 └── docs/
-    └── BEHAVIORAL_INTELLIGENCE_ARCHITECTURE.docx  # Full architecture doc
+    └── BEHAVIORAL_INTELLIGENCE_ARCHITECTURE.docx
 ```
 
-### New Supabase Tables
+### Key Design Decisions
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `user_events` | Every tracked behavior | user_id, event_type, entity_type, metadata, session_id |
-| `user_buy_boxes` | Computed buy box per user | counties[], zip_affinities[], judgment_range, archetype |
-| `user_teasers` | Teasers sent + outcomes | match_score, tier, sent_at, opened_at, action_taken |
-| `user_preferences` | Channel preferences | email/push/sms enabled, peak_window, max_teasers |
+**No foreign keys on user_id** — Tables use `UUID NOT NULL` without FK to `auth.users`. This allows PostHog to write events using distinct_id before Supabase auth signup, and avoids CASCADE issues during development. Add FK constraints when user auth is stable.
 
-### pg_cron Schedule
+**pg_cron jobs commented out** — The cron jobs call Edge Functions that aren't deployed yet. Running them would generate silent 404 failures in `cron.job_run_details`. Uncomment and run only after Edge Functions are live.
 
-| Time (EST) | Job | Edge Function | Purpose |
-|-----------|-----|---------------|---------|
-| 2:00 AM | compute_buy_boxes | compute-buy-boxes | Analyze events → build buy boxes |
-| 6:00 AM | match_auctions | match-auctions | Match buy boxes × new auctions |
-| 6:05 AM | send_teasers | send-teasers | Deliver teasers via Novu |
-| 11:00 PM | master_scraper | (existing) | Refresh auction data |
+**PostHog webhook has auth** — The `posthog-webhook` Edge Function validates an `x-webhook-secret` header. Generate a random string, set it as both the Supabase secret and the PostHog webhook header.
 
-### Teaser Tiers
+**RLS is service_role only** — Current policies grant full access to service_role (Edge Functions, admin). User-facing `auth.uid()` policies are in the migration as comments — enable when user auth flows are built.
 
-| Tier | Score | Channels | Timing | Format |
-|------|-------|----------|--------|--------|
-| 1 | 60-74 | Email digest | Weekly (Monday) | Batch summary |
-| 2 | 75-89 | Push + Email | User's peak window | Individual alert |
-| 3 | 90-100 | SMS + Push + Email | Immediate | Urgency + curiosity gap |
-
-### User Archetypes (Auto-Classified)
-
-| Archetype | Pattern | Teaser Strategy |
-|-----------|---------|----------------|
-| Scanner | Daily visits, broad searches, high volume | Volume teasers, many Tier 1 |
-| Sniper | Weekly visits, narrow criteria, deep analysis | Few, high-confidence Tier 2-3 only |
-| Researcher | Long sessions, uses all agents, generates reports | Data-rich teasers with previews |
-| Opportunist | Irregular visits, reacts to alerts | SMS triggers only (Tier 3) |
-
-### Environment Variables Required
-
-```bash
-# PostHog
-NEXT_PUBLIC_POSTHOG_KEY=phc_xxxxx
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-
-# Novu
-NOVU_API_KEY=xxxxx
-
-# Twilio (for Tier 3 SMS via Novu)
-TWILIO_ACCOUNT_SID=xxxxx
-TWILIO_AUTH_TOKEN=xxxxx
-TWILIO_PHONE_NUMBER=+1xxxxxxxxxx
-
-# Firebase Cloud Messaging (for push via Novu)
-FCM_SERVER_KEY=xxxxx
-
-# Supabase (already configured)
-SUPABASE_URL=https://mocerqjnksmhcjzxrewo.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=xxxxx
-```
-
-### Implementation Phases
-
-| Phase | Weeks | Focus |
-|-------|-------|-------|
-| 1 | 1-2 | PostHog tracking + user_events table |
-| 2 | 3-4 | Buy box computation + matching engine |
-| 3 | 5-6 | Novu + Resend + FCM integration |
-| 4 | 7-8 | Twilio SMS + user preferences UI |
-| 5 | 9-12 | Feedback loop + A/B testing + archetype tuning |
-
-### Monthly Cost Impact
+### Monthly Cost (When Fully Active)
 
 | Tool | Cost |
 |------|------|
 | PostHog | $0 (1M events/mo free) |
-| Supabase Edge Functions | $0 (included in Pro) |
+| Supabase Edge Functions + pg_cron | $0 (included in Pro) |
 | Novu | $0 (open source free tier) |
 | Resend | $0-20/mo |
-| Twilio SMS | $10-15/mo |
+| Twilio SMS (Tier 3 only) | $10-15/mo |
 | Firebase Cloud Messaging | $0 |
 | **Total** | **$10-35/mo** |
 
 ---
 
 *Module designed by Claude AI Architect — March 8, 2026*
-*Nir Eyal Hooked Model applied to distressed asset intelligence*
