@@ -2,31 +2,29 @@
 
 See full module: [`behavioral-intelligence/`](../behavioral-intelligence/README.md)
 
-## Quick Reference
+## Current Status: TABLES LIVE, ENGINE PAUSED
 
-- **SQL Migration**: `behavioral-intelligence/migrations/20260308_behavioral_intelligence.sql`
-- **Edge Functions**: `behavioral-intelligence/supabase/functions/`
-- **PostHog Config**: `behavioral-intelligence/lib/posthog/config.ts`
-- **Architecture Doc**: `behavioral-intelligence/docs/BEHAVIORAL_INTELLIGENCE_ARCHITECTURE.docx`
+**What's running now:**
+- 4 Supabase tables with 22 indexes, RLS, triggers
+- 2 analytics views (v_teaser_funnel, v_buy_box_health)
+- Vault secret stored for future Edge Function auth
 
-## New Stack Components
+**What's paused (code ready, not deployed):**
+- 4 Edge Functions (deploy when 50+ active users)
+- 3 pg_cron jobs (commented out, enable after Edge Functions)
+- PostHog tracking (deploy JS snippet at launch)
+- Novu notifications (sign up when teaser engine needed)
 
-| Tool | Purpose | Cost |
-|------|---------|------|
-| PostHog | Behavioral tracking | $0 |
-| Novu | Multi-channel notifications | $0 |
-| Twilio | SMS (Tier 3 teasers) | $10-15/mo |
-| Firebase Cloud Messaging | Push notifications | $0 |
+## Activation Triggers
 
-## New Supabase Tables
+| Milestone | Action |
+|-----------|--------|
+| Frontend launch | Deploy PostHog JS snippet |
+| 50+ active users | Deploy Edge Functions + enable pg_cron |
+| 100+ active users | Set up Novu + notification channels |
+| 200+ active users | Add Twilio SMS for Tier 3 teasers |
 
-- `user_events` — behavioral signals
-- `user_buy_boxes` — computed buy boxes
-- `user_teasers` — teaser delivery + outcomes
-- `user_preferences` — channel preferences
+## Architecture Doc
 
-## pg_cron Jobs
-
-- 2:00 AM EST — compute_buy_boxes
-- 6:00 AM EST — match_auctions
-- 6:05 AM EST — send_teasers
+Full ASCII diagrams and stack inventory:
+`behavioral-intelligence/docs/BEHAVIORAL_INTELLIGENCE_ARCHITECTURE.docx`
