@@ -1,5 +1,9 @@
 # BidDeed.AI — Claude Code Root Directive
 
+## Engineering Methodology (Superpowers)
+Read and follow `SUPERPOWERS.md` for verification gates, systematic debugging, code review, testing anti-patterns, and YAGNI enforcement.
+Source: [breverdbidder/superpowers](https://github.com/breverdbidder/superpowers) (forked from obra/superpowers v4.3.1, MIT)
+
 ## Identity
 BidDeed.AI is "Claude AI for Real Estate" — an agentic foreclosure auction intelligence platform.
 Forked from vercel/chatbot. House brand: Navy #1E3A5F, Orange #F59E0B, Inter font, bg #020617.
