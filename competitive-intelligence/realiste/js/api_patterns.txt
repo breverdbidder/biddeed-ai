@@ -1,0 +1,47 @@
+baseURL&&(l.request=h(l.request
+baseURL))
+baseURL
+baseURL:Kt.baseURL}))
+Endpoint:"https://api.iconify.design"
+Endpoint:"/api/_nuxt_icon"
+baseURL
+Endpoint:""
+baseURL
+baseURL)?void 0:t.replace(/\/$/
+Endpoint||"/api/_nuxt_icon"))
+Endpoint)}else o.push(a.iconifyApiEndpoint)
+Endpoint||s.httpEndpoint
+Endpoint){const t=gm({...s.wsLinkOptions
+Endpoint
+baseURL+e.href:U(r.app.baseURL
+graphqlUrl})
+graphqlUrl})
+GraphqlUrl)}))
+GraphqlUrl})
+GraphqlUrl})
+GraphqlUrl})
+GraphqlUrl)}))
+graphqlUrl})
+GraphqlUrl})
+ApiUrl:null
+ApiUrl:null
+ApiUrl(){return m(this
+ApiUrl}get filtersSetArr(){return m(this
+apiUrl:"https://app.tolgee.io"
+apiUrl=pd(r.apiUrl)
+apiKey:a
+apiUrl:o
+apiKey:a
+apiUrl:o
+apiKey:o
+apiUrl:n
+apiKey:o
+apiUrl:n
+apiUrl:pd(e.apiUrl)}):void 0}})
+apiKey&&o.getInitialOptions().apiUrl)
+apiKey"
+apiUrl"
+apiKey:e
+apiUrl:t}}function Md(){sessionStorage.removeItem(Ud)
+apiUrl:e.getInitialOptions().apiUrl||""
+apiKey:e.getInitialOptions().apiKey||""}}).catch(Md)}

@@ -1,0 +1,16 @@
+HTTP/2 302 
+date: Wed, 11 Mar 2026 01:45:34 GMT
+content-type: text/html
+server: cloudflare
+location: /en
+set-cookie: i18n_redirected=en; Path=/; Expires=Thu, 11 Mar 2027 01:45:34 GMT; SameSite=Lax
+vary: Accept-Encoding
+access-control-allow-headers: content-type,x-client-token,x-encrypted-token,x-utm-campaign,x-utm-content,x-utm-medium,x-utm-source,baggage,sentry-trace,origin,x-requested-with,x-api-key,authorization,jwt-aud
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,DELETE,PUT,PATCH,OPTIONS,HEAD
+cf-cache-status: DYNAMIC
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=BHvlUOpjO6cdBLakvOJxJK38u7xvbUa3IzunWWK9AgssPPP2Xh1Rim7hWiBBz8zCn06OKnAe%2BOIxwd%2BuBHXKNoK9wv0PEPpDTxxVtL0LU4La"}]}
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+cf-ray: 9da6e165f8e405bb-IAD
+alt-svc: h3=":443"; ma=86400
+

@@ -1,0 +1,9 @@
+HTTP/2 302 
+server: nginx
+date: Wed, 11 Mar 2026 01:45:34 GMT
+content-type: text/html
+location: /?locale=en
+access-control-allow-headers: content-type,x-client-token,x-encrypted-token,x-utm-campaign,x-utm-content,x-utm-medium,x-utm-source,baggage,sentry-trace,origin,x-requested-with,x-api-key,authorization,jwt-aud
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,DELETE,PUT,PATCH,OPTIONS,HEAD
+

@@ -1,0 +1,10 @@
+{
+  "error": true,
+  "url": "https://titleman.ai/graphql?locale=en",
+  "statusCode": 404,
+  "statusMessage": "Page not found: /graphql?locale=en",
+  "message": "Page not found: /graphql?locale=en",
+  "data": {
+    "path": "/graphql?locale=en"
+  }
+}
