@@ -1,0 +1,39 @@
+name: Skills Installer
+on:
+  push:
+    paths: ['.skills-install-trigger']
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install -g skills
+      - name: Supabase Postgres
+        run: npx skills add supabase/agent-skills -a claude-code --non-interactive || true
+      - name: Systematic debugging
+        run: npx skills add obra/superpowers -a claude-code --skill systematic-debugging --non-interactive || true
+      - name: Subagent dev
+        run: npx skills add obra/superpowers -a claude-code --skill subagent-driven-development --non-interactive || true
+      - run: find . -name "SKILL.md" -path "*/.claude/*" | sort
+      - name: Commit
+        run: |
+          git config user.name "skills-scout[bot]"
+          git config user.email "skills-scout@biddeed.ai"
+          git add -A
+          git diff --staged --quiet || git commit -m "feat(skills): supabase+debugging+subagent (Agent 17)"
+          git push
+      - name: Notify
+        if: always()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          C=$(find . -name "SKILL.md" -path "*/.claude/*" | wc -l)
+          curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="Skills installed biddeed-ai: ${C} | ${{ job.status }}" || true
