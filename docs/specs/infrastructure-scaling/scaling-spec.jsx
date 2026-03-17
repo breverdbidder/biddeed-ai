@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 
 // ─── Supabase Config ───────────────────────────────────────
 const SUPABASE_URL = "https://mocerqjnksmhcjzxrewo.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1MzI1MjYsImV4cCI6MjA4MDEwODUyNn0.YOUR_ANON_KEY_HERE"; // Replace with actual anon key for client-side
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1MzI1MjYsImV4cCI6MjA4MDEwODUyNn0.ySFJIOngWWB0aqYra4PoGFuqcbdHOx1ZV6T9-klKQDw";
 
 // Fallback data if Supabase unavailable (matches seeded DB values)
 const FALLBACK_WORKLOADS = {
