@@ -167,3 +167,44 @@ A brainstorm session is DONE when:
 - [ ] Both files pushed to target repo
 - [ ] Claude Code launch command provided with correct file order
 - [ ] Ariel knows exactly what to paste into Claude Code to start execution
+
+---
+
+## AskUserQuestion Re-Grounding Format (gstack pattern, MANDATORY)
+
+> Cherry-picked from garrytan/gstack (MIT License), Mar 17, 2026
+
+Every time Claude presents a question to Ariel — whether during brainstorm, review, or any workflow — it MUST follow this structure:
+
+### The 4-Part Format
+
+1. **Re-ground:** State the project name, the current branch (or task), and what we're working on right now. (1-2 sentences max)
+2. **ELI16:** Explain the problem in plain English that a smart 16-year-old could follow. No function names, no internal jargon, no implementation details. Use concrete examples and analogies. Say what it DOES, not what it's called.
+3. **Recommend:** `RECOMMENDATION: Choose [X] because [one-line reason]`
+4. **Options:** Lettered options: `A) ... B) ... C) ...`
+
+### Why This Exists
+
+Ariel has ADHD and operates on 20 min/day oversight. When a question appears, he may not have context loaded. The re-grounding step eliminates the "wait, what was I working on?" moment. The ELI16 step prevents the "I don't understand the tradeoff" paralysis. The recommendation gives a default path if he wants to move fast.
+
+### Example
+
+**Bad (no context, jargon-heavy):**
+> Should we use STRtree bulk spatial join or per-centroid query against the municipal GIS layer for Palm Bay parcels?
+
+**Good (re-grounded, ELI16, recommended):**
+> We're working on **ZoneWise Scraper V4** (branch: `feat/palm-bay-conquest`), adding zoning data for Palm Bay's 78K parcels.
+>
+> Think of it like looking up zoning for every house in Palm Bay. We can either: batch all 78K lookups into one big request (faster, but if it fails we lose everything), or check each house one at a time against the city's map (slower, but if one fails the others still work).
+>
+> RECOMMENDATION: Choose A because bulk is 10x faster and we can add retry logic for the rare failure case.
+>
+> A) Bulk spatial join (fast, one request, needs retry logic)
+> B) Per-centroid individual queries (slow, resilient, no retry needed)
+> C) Hybrid — bulk first, fall back to individual on failure
+
+### When NOT to Re-ground
+
+- Follow-up questions in the same decision flow (Ariel just answered, context is fresh)
+- Simple confirmations ("Ready to deploy? Y/N")
+- The question IS the re-grounding ("What should we work on next?")
